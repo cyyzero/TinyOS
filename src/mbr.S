@@ -36,7 +36,7 @@ SECTION MBR vstart=0x7c00
     mov bx, LOADER_BASE_ADDR           ; 加载到内存的目的地址
     mov cx, 4                          ; 读入的扇区数
     call rd_disk_m_16
-    jmp LOADER_BASE_ADDR
+    jmp LOADER_BASE_ADDR + 0x300
 
 ; 功能： 读取硬盘
 ; 参数：
