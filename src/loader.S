@@ -42,8 +42,8 @@ loader_start:
     mov edx, 0x534d4150                ; ‘SMAP’
     mov di, ards_buf                   ; es:di指向缓冲区，存放得到的数据
 .e820_mem_get_loop:
-    mov eax, 0x0000e820
-    mov ecx, 20                        ; 缓冲区大小
+    mov eax, 0x0000e820                ; 功能号，每次调用结束后都会变成'SMAP'
+    mov ecx, 20                        ; 缓冲区字节大小，每次调用结束后为实际写入的字节数
     int 0x15
     jc .e820_failed_so_try_e801;       ; CF置1为调用失败
     add di, cx                         ; 更新es:di
@@ -54,7 +54,7 @@ loader_start:
     ; 获取数组中 base_add_low + length_low 最大的元素，即内存的容量
     mov cx, [ards_nr]
     mov ebx, ards_buf
-    xor edx, edx               ; edx保存内存的容量
+    xor edx, edx                       ; edx保存内存的容量
 .find_max_mem_area:
     mov eax, [ebx]
     add eax, [ebx+8]
