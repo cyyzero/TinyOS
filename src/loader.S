@@ -17,7 +17,7 @@ CODE_DESC:       dd 0x0000FFFF
 DATA_STACK_DESC: dd 0x0000FFFF
                  dd DESC_DATA_HIGH4
 
-VIDEO_DESC:      dd 0x80000007         ; limit = (0xbffff-0xb8000)/4k = 0x7
+VIDEO_DESC:      dd 0x80000007               ; limit = (0xbffff-0xb8000)/4k = 0x7
                  dd DESC_VIDEO_HIGH4
 times 60 dq 0
 GDT_SIZE   equ $ - GDT_BASE
@@ -143,51 +143,77 @@ p_mode_start:
     mov ax, SELECTOR_VIDEO
     mov gs, ax
 
-    mov byte [gs:160], 'P'
+    mov byte [gs:160], 'P'                   ; 第二行第一个字符
     mov byte [gs:161], 0x0c
-    mov byte [gs:162], ' '
-    mov byte [gs:163], 0x0c
-    mov byte [gs:164], 'm'
-    mov byte [gs:165], 0x0c
-    mov byte [gs:166], 'o'
-    mov byte [gs:167], 0x0c
-    mov byte [gs:168], 'd'
-    mov byte [gs:169], 0x0c
-    mov byte [gs:170], 'e'
-    mov byte [gs:171], 0x0c
+
+; 进入分页
+
+    call setup_page                          ; 创建页目录项和页表
+
+    sgdt [gdt_ptr]                           ; 存储原来的gdt
+
+    ; 修改显存的段基址到3GB以上，即给段基址加上0xc0000000
+    mov ebx, [gdt_ptr + 2]
+    or dword [ebx + 0x18 + 4], 0xc0000000
+
+    add dword [gdt_ptr + 2], 0xc0000000      ; gdt的基址也加上0xc0000000，映射到3GB以上的地址空间
+
+    add esp, 0xc0000000                      ; 栈指针也映射到内核空间
+
+    ; 将页目录地址给cr3
+    mov eax, PAGE_DIR_TABLE_POS
+    mov cr3, eax
+
+    ; 打开cr0的pg位
+    mov eax, cr0
+    or eax, 0x80000000
+    mov cr0, eax
+
+    lgdt [gdt_ptr]                           ; 重新加载gdt
+
+    mov byte [gs:320], 'V'                    ; 第三行第一个字符
+    mov byte [gs:321], 0x0c
     jmp $
 
+
+; 初始化页目录项和页表
 setup_page:
+    ; 将页目录项都清零
     mov ecx, 4096
     mov esi, 0
 .clear_page_dir:
     mov byte [PAGE_DIR_TABLE_POS + esi], 0
     inc esi
     loop .clear_page_dir
+
+    ; 
 .create_pde:
     mov eax, PAGE_DIR_TABLE_POS
-    add eax, 0x1000
+    add eax, 0x1000                          ; 指向第一个页表;
     mov ebx, eax
-    or eax, PG_US_U | PG_RW_W | PG_P
+    or eax, PG_US_U | PG_RW_W | PG_P         ; 设置属性
     mov [PAGE_DIR_TABLE_POS + 0x0], eax
-    mov [PAGE_DIR_TABLE_POS + 0xc00], eax
-    sub eax, 0x1000
-    mov [PAGE_DIR_TABLE_POS + 4096], eax
-    mov ecx, 256
+    mov [PAGE_DIR_TABLE_POS + 0xc00], eax    ; 第768个页目录项，为第3GB地址的起始
+    sub eax, 0x1000                          ; 指向页第一个目录项
+    mov [PAGE_DIR_TABLE_POS + 1023*4], eax   ; 将最后一个页目录项指向第一个页目录项
+
+    ; 创建页表项PTE
+    mov ecx, 256                             ; 0～1M地址的页表项
     mov esi, 0
     mov edx, PG_US_U | PG_RW_W | PG_P
 .create_pte:
-    mov [ebx + esi*4], edx
-    add edx, 4096
+    mov [ebx + esi*4], edx                   ; ebx为第一个页表的地址
+    add edx, 0x1000
     inc esi
     loop .create_pte
 
+    ; 创建内核其他页表的PDE
     mov eax, PAGE_DIR_TABLE_POS
-    add eax, 0x2000
+    add eax, 0x2000                          ; 指向第二个页表
     or eax, PG_US_U | PG_RW_W | PG_P
     mov ebx, PAGE_DIR_TABLE_POS
     mov ecx, 254
-    mov esi, 769
+    mov esi, 769                             ; 初始化第769～1022的所有页目录项。
 .create_kernel_pde:
     mov [ebx + esi*4], eax
     inc esi
