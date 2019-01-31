@@ -114,7 +114,6 @@ loader_start:
     mov [total_mem_bytes], edx
 
 ; 进入保护模式
-
     ; 1. 打开A20
     in al, 0x92
     or al, 0000_0010b
@@ -146,6 +145,14 @@ p_mode_start:
     mov byte [gs:160], 'P'                   ; 第二行第一个字符
     mov byte [gs:161], 0x0c
 
+; 加载kernel
+
+    mov eax, KERNEL_START_SECTOR             ; 起始扇区号
+    mov ebx, KERNEL_BIN_BASE_ADDR            ; 内存起始地址
+    mov ecx, 200                             ; 扇区数
+
+    call rd_disk_m_32
+
 ; 进入分页
 
     call setup_page                          ; 创建页目录项和页表
@@ -171,12 +178,135 @@ p_mode_start:
 
     lgdt [gdt_ptr]                           ; 重新加载gdt
 
-    mov byte [gs:320], 'V'                    ; 第三行第一个字符
+    mov byte [gs:320], 'V'                   ; 第三行第一个字符
     mov byte [gs:321], 0x0c
-    jmp $
+
+    jmp SELECTOR_CODE:enter_kernel           ; 强制刷新流水线，更新gdt
+
+enter_kernel:
+    call kernel_init
+    mov esp, 0xc009f000
+    jmp KERNEL_ENTRY_POINT
 
 
-; 初始化页目录项和页表
+
+; 功能：从硬盘读取数据到内存
+; 参数：
+;   eax: 起始扇区号
+;   ebx: 内存起始地址
+;   ecx: 扇区数量
+rd_disk_m_32:
+    mov esi, eax
+    mov di, cx
+
+; 设置要读的扇区数
+    mov dx, 0x1f2
+    mov al, cl
+    out dx, al
+
+    mov eax, esi
+
+; 将LBA地址存入0x1f3 ~ 0x1f6
+
+    ; LBA地址0～7位写入端口0x1f3
+    mov dx, 0x1f3
+    out dx, al
+
+    mov cl, 8
+
+    ; LBA地址8~15位写入端口0x1f4
+    shr eax, cl
+    mov dx, 0x1f4
+    out dx, al
+
+    ; LBA地址16～23位写入端口0x1f5
+    shr eax, cl
+    mov dx, 0x1f5
+    out dx, al
+
+    ; LBA地址24～27位写入端口0x1f6的低4位，高4位设置成 b1110
+    shr eax, cl
+    and al, 0x0f
+    or al, 0xe0
+    mov dx, 0x1f6
+    out dx, al
+
+; 向0x1f7端口写入读命令，0x20
+    mov dx, 0x1f7
+    mov al, 0x20
+    out dx, al
+
+; 检测硬盘状态
+.not_ready:
+    nop
+    in al, dx
+    and al, 0x88    ; 查看第4位和第7位，分别表示已准备好数据传输和硬盘正忙
+    cmp al, 0x08
+    jnz .not_ready
+
+; 从0x1f0端口读数据
+    mov ax, di      ; di为读取的扇区数
+    mov dx, 256
+    mul dx          ; dx为读的次数，di*512/2。一个扇区512字节，每次读两个字节
+    mov cx, ax
+    mov dx, 0x1f0
+
+.go_on_read:
+    in ax, dx
+    mov [ebx], ax
+    add ebx, 2
+    loop .go_on_read
+    ret
+
+; 将kernel.bin中的segment拷贝到编译的地址
+kernel_init:
+    xor eax, eax
+    xor ebx, ebx
+    xor ecx, ecx
+    xor edx, edx
+
+    mov dx, [KERNEL_BIN_BASE_ADDR + 42]      ; 得到e_phentsize，即program header的大小
+    mov ebx, [KERNEL_BIN_BASE_ADDR + 28]     ; 得到e_phoff，即第一个program header在文件中的偏移量
+
+    add ebx, KERNEL_BIN_BASE_ADDR
+    mov cx, [KERNEL_BIN_BASE_ADDR + 44]      ; 得到e_phnum，即program header的数量
+
+.each_segment:
+    cmp byte [ebx + 0], PT_NULL
+    je .PTNULL
+
+    push dword [ebx + 16]                    ; 压入p_filesz，即program的字节数
+    mov eax, [ebx + 4]                       ; eax存储p_offset，即program的偏移量
+    add eax, KERNEL_BIN_BASE_ADDR
+
+    push eax
+    push dword [ebx + 8]                     ; 压入p_vaddr，即program起始的虚拟地址
+    call mem_cpy
+    add esp, 12
+.PTNULL:
+    add ebx, edx                             ; 指向下一个program header entry
+
+    loop .each_segment
+    ret
+
+; 功能：逐字节拷贝
+; 输入：栈中三个参数
+mem_cpy:
+    cld                                      ; 设置movsb指令对edi和esi的更新方式，为增加1B
+    push ebp
+    mov ebp, esp
+    push ecx
+    mov edi, [ebp + 8]                       ; dst
+    mov esi, [ebp + 12]                      ; src
+    mov ecx, [ebp + 16]                      ; size
+    rep movsb                                ;逐字节拷贝
+
+    ; 恢复环境
+    pop ecx
+    pop ebp
+    ret
+
+; 功能：初始化页目录项和页表
 setup_page:
     ; 将页目录项都清零
     mov ecx, 4096
