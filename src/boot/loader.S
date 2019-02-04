@@ -142,8 +142,8 @@ p_mode_start:
     mov ax, SELECTOR_VIDEO
     mov gs, ax
 
-    mov byte [gs:160], 'P'                   ; 第二行第一个字符
-    mov byte [gs:161], 0x0c
+    ; mov byte [gs:160], 'P'                   ; 第二行第一个字符
+    ; mov byte [gs:161], 0x0c
 
 ; 加载kernel
 
@@ -178,14 +178,15 @@ p_mode_start:
 
     lgdt [gdt_ptr]                           ; 重新加载gdt
 
-    mov byte [gs:320], 'V'                   ; 第三行第一个字符
-    mov byte [gs:321], 0x0c
+    ; mov byte [gs:320], 'V'                   ; 第三行第一个字符
+    ; mov byte [gs:321], 0x0c
 
     jmp SELECTOR_CODE:enter_kernel           ; 强制刷新流水线，更新gdt
 
 enter_kernel:
     call kernel_init
     mov esp, 0xc009f000
+
     jmp KERNEL_ENTRY_POINT
 
 

@@ -23,14 +23,14 @@ SECTION MBR vstart=0x7c00
 
     int 0x10
 
-    mov byte [gs:0x00], 'M'
-    mov byte [gs:0x01], 0x0c  ; 0表示黑色背景闪烁， c表示前景色为亮红色
+    ; mov byte [gs:0x00], 'M'
+    ; mov byte [gs:0x01], 0x0c  ; 0表示黑色背景闪烁， c表示前景色为亮红色
 
-    mov byte [gs:0x02], 'B'
-    mov byte [gs:0x03], 0x0c
+    ; mov byte [gs:0x02], 'B'
+    ; mov byte [gs:0x03], 0x0c
 
-    mov byte [gs:0x04], 'R'
-    mov byte [gs:0x05], 0x0c
+    ; mov byte [gs:0x04], 'R'
+    ; mov byte [gs:0x05], 0x0c
 
     mov eax, LOADER_START_SECTOR       ; 所读扇区的扇区号
     mov bx, LOADER_BASE_ADDR           ; 加载到内存的目的地址
