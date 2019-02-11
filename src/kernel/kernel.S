@@ -1,27 +1,28 @@
 [bits 32]
 %define ERROR_CODE nop
-%define ZERO push 0
+%define ZERO push 0                          ; 为了统一错误码，没有错误码也压入32bit的数据
 
 extern put_str;
 
 section .data
 intr_str db "interrupt occur!", 0xa, 0
 global intr_entry_table
+
 intr_entry_table:
 
-%macro VECTOR 2
+%macro VECTOR 2                              ; nasm的宏
 section .text
-intr%lentry:
+intr%1entry:
     %2
     push intr_str
     call put_str
     add esp, 4
 
-    mov al, 0x20
-    out 0xa0, al
-    out 0x20, al
+    mov al, 0x20                             ; OCW2，中断结束命令EOI
+    out 0xa0, al                             ; 向从片发送
+    out 0x20, al                             ; 向主片发送
 
-    add esp, 4
+    add esp, 4                               ; 跨过错误码
     iret
 
 section .data
