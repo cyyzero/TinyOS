@@ -5,4 +5,4 @@ typedef void* intr_handler;
 
 void idt_init(void);
 
-#endif // __INTERUPT_H
+#endif // __INTERRUPT_H
