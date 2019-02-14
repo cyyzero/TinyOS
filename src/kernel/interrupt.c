@@ -55,7 +55,7 @@ static void idt_desc_init(void)
 }
 
 // 初始化可编程中断控制器8259A
-static void pic_init()
+static void pic_init(void)
 {
     // 初始化主片
     outb(PIC_M_CTRL, 0x11);                  // ICW1: 边沿触发，级联8259，需要ICW4
