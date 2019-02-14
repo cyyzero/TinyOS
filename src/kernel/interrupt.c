@@ -11,6 +11,9 @@
 
 #define IDT_DESC_CNT 0x21
 
+#define EFLAGS_IF 0x00000200                 // eflags寄存器中的if位为1
+#define GET_EFLAGS(EFLAG_VAR) asm volatile ("pushfl; popl %0" : "=g" (EFLAG_VAR))
+
 // 中断门描述符
 struct gate_desc
 {
@@ -21,8 +24,10 @@ struct gate_desc
     uint16_t func_offset_high_word;          // 16..31位的偏移量
 };
 
+// 定义在kernel.S中的中断处理函数入口数组
 extern intr_handler intr_entry_table[IDT_DESC_CNT];
 
+// 中断描述符表
 static struct gate_desc idt[IDT_DESC_CNT];
 
 // 用于保存异常的名字
@@ -83,6 +88,7 @@ static void general_intr_handler(uint8_t vec_nr)
     put_char('\n');
 }
 
+// 初始化中断向量和中断名表
 static void exception_init(void)
 {
     for (int i = 0; i < IDT_DESC_CNT; ++i)
@@ -113,6 +119,52 @@ static void exception_init(void)
     intr_name[19] = "#XF SIMD Floating-Point Exception";
 }
 
+// 开中断，并返回开中断前的状态
+enum intr_status intr_enable(void)
+{
+    enum intr_status old_status;
+    if (intr_get_status() == INTR_ON)
+    {
+        old_status = INTR_ON;
+    }
+    else
+    {
+        old_status = INTR_OFF;
+        asm volatile("sti");                 // 开中断，sti指令将IF位置1
+    }
+    return old_status;
+}
+
+// 关中断，并返回关中断前的状态
+enum intr_status intr_disable(void)
+{
+    enum intr_status old_status;
+    if (intr_get_status() == INTR_ON)
+    {
+        old_status = INTR_ON;
+        asm volatile("cli" : : : "memory");  // 关中断，cli指令将IF位置0
+    }
+    else
+    {
+        old_status = INTR_OFF;
+    }
+    return old_status;
+}
+
+// 设置中断状态
+enum intr_status intr_set_status(enum intr_status status)
+{
+    return status & INTR_ON ? intr_enable() : intr_disable();
+}
+
+// 获取当前中断状态
+enum intr_status intr_get_status(void)
+{
+    uint32_t eflags = 0;
+    GET_EFLAGS(eflags);
+    return (eflags & EFLAGS_IF) ? INTR_ON : INTR_OFF;
+}
+
 // 完成中断相关的初始化工作
 void idt_init()
 {
@@ -121,7 +173,7 @@ void idt_init()
     exception_init();
     pic_init();                              // 初始化8259A
 
-    // 加载ID
+    // 加载IDT
     uint64_t idt_operand = (sizeof(idt) - 1) | ((uint64_t)((uint32_t)idt << 16));
     asm volatile("lidt %0" : : "m" (idt_operand));
     put_str("idt_init done\n");

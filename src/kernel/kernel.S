@@ -2,33 +2,46 @@
 %define ERROR_CODE nop
 %define ZERO push 0                          ; 为了统一错误码，没有错误码也压入32bit的数据
 
-extern put_str;
+extern idt_table
 
 section .data
-intr_str db "interupt occur!", 0xa, 0
 global intr_entry_table
-
 intr_entry_table:
 
 %macro VECTOR 2                              ; nasm的宏
 section .text
 intr%1entry:
     %2
-    push intr_str
-    call put_str
-    add esp, 4
+    push ds
+    push es
+    push fs
+    push gs
+    pushad                                   ; pushad指令压入32位寄存器，入栈顺序为EAX,ECX,EDX,EBX,ESP,EBP,ESI,EDI
 
     mov al, 0x20                             ; OCW2，中断结束命令EOI
     out 0xa0, al                             ; 向从片发送
     out 0x20, al                             ; 向主片发送
 
-    add esp, 4                               ; 跨过错误码
-    iret
+    push %1                                  ; 一律压入中断向量号，便于调试
+    call [idt_table + %1*4]                  ; 调用dit_table中的C版本中断处理函数
+    jmp intr_exit
 
 section .data
     dd intr%1entry
 
 %endmacro
+
+section .text
+global intr_exit
+intr_exit:
+    add esp, 4                               ; 跳过中断号
+    popad
+    pop gs
+    pop fs
+    pop es
+    pop ds
+    add esp, 4                               ; 跳过error_code
+    iretd
 
 VECTOR 0x00, ZERO
 VECTOR 0x01, ZERO
