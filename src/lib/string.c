@@ -5,7 +5,7 @@
 // 将dest起始的size个字节初始化为value
 void memset(void* dst, uint8_t value, uint32_t size)
 {
-    ASSERT(dest != NULL);
+    ASSERT(dst != NULL);
     for (uint32_t i = 0; i < size; ++i)
     {
         ((uint8_t*)dst)[i] = value;
@@ -44,7 +44,7 @@ char* strcpy(char* dst, const char* src)
 {
     ASSERT(dst != NULL && src != NULL);
     char* ret = dst;
-    while (*dst++ = *src++)
+    while ((*dst++ = *src++))
         continue;
     return ret;
 }
@@ -78,7 +78,7 @@ char* strchr(const char* str, char ch)
     while (*str)
     {
         if (ch == *str)
-            return str;
+            return (char*)str;
         ++str;
     }
     return NULL;
@@ -95,7 +95,7 @@ char* strrchr(const char* str, char ch)
             last_char = str;
         ++str;
     }
-    return last_char;
+    return (char*)last_char;
 }
 
 // 将src拼接到dst后，并返回拼接后串的地址
@@ -103,10 +103,10 @@ char* strcat(char* dst, const char* src)
 {
     ASSERT(dst != NULL && src != NULL);
     char* str = dst;
-    while (*str++)
+    while (*str)
+        ++str;
+    while ((*str++ = *src++))
         continue;
-    while (*str++ = *src++)
-        continue
     return dst;
 }
 
