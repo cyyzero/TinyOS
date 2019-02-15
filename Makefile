@@ -9,7 +9,7 @@ CFLAGS = -Wall $(LIB) -c -m32 -fno-builtin -W -Wstrict-prototypes -Wmissing-prot
 LDFLAGS = -m elf_i386 -Ttext $(ENTRY_POINT) -e main -Map $(BIN_DIR)/kernel.map
 OBJS = $(BIN_DIR)/main.o $(BIN_DIR)/init.o $(BIN_DIR)/interrupt.o $(BIN_DIR)/timer.o \
 	$(BIN_DIR)/kernel.o $(BIN_DIR)/print1.o $(BIN_DIR)/print2.o $(BIN_DIR)/debug.o  \
-	$(BIN_DIR)/string.o
+	$(BIN_DIR)/string.o $(BIN_DIR)/bitmap.o
 
 # C代码编译
 $(BIN_DIR)/main.o: ./src/kernel/main.c ./src/lib/kernel/print.h ./src/lib/stdint.h ./src/kernel/init.h
@@ -31,6 +31,9 @@ $(BIN_DIR)/print1.o: ./src/lib/kernel/print.c ./src/lib/kernel/print.h ./src/lib
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BIN_DIR)/string.o: ./src/lib/string.c ./src/lib/string.h ./src/kernel/global.h ./src/kernel/debug.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BIN_DIR)/bitmap.o: ./src/lib/kernel/bitmap.c ./src/lib/kernel/bitmap.h ./src/lib/stdint.h ./src/lib/string.h ./src/lib/kernel/print.h ./src/kernel/interrupt.h ./src/kernel/debug.h
 	$(CC) $(CFLAGS) $< -o $@
 
 # 编译汇编代码
