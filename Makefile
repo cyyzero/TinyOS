@@ -12,7 +12,7 @@ OBJS = $(BIN_DIR)/main.o $(BIN_DIR)/init.o $(BIN_DIR)/interrupt.o $(BIN_DIR)/tim
 	$(BIN_DIR)/string.o $(BIN_DIR)/bitmap.o $(BIN_DIR)/memory.o
 
 # C代码编译
-$(BIN_DIR)/main.o: ./src/kernel/main.c ./src/lib/kernel/print.h ./src/lib/stdint.h ./src/kernel/init.h
+$(BIN_DIR)/main.o: ./src/kernel/main.c ./src/lib/kernel/print.h ./src/lib/stdint.h ./src/kernel/init.h ./src/kernel/memory.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BIN_DIR)/init.o: ./src/kernel/init.c ./src/kernel/init.h ./src/lib/kernel/print.h ./src/lib/stdint.h ./src/kernel/interrupt.h ./src/device/timer.h ./src/kernel/memory.h
@@ -36,7 +36,7 @@ $(BIN_DIR)/string.o: ./src/lib/string.c ./src/lib/string.h ./src/kernel/global.h
 $(BIN_DIR)/bitmap.o: ./src/lib/kernel/bitmap.c ./src/lib/kernel/bitmap.h ./src/lib/stdint.h ./src/lib/string.h ./src/lib/kernel/print.h ./src/kernel/interrupt.h ./src/kernel/debug.h
 	$(CC) $(CFLAGS) $< -o $@
 
-$(BIN_DIR)/memory.o: ./src/kernel/memory.c ./src/kernel/memory.h ./src/lib/stdint.h ./src/lib/kernel/print.h
+$(BIN_DIR)/memory.o: ./src/kernel/memory.c ./src/kernel/memory.h ./src/lib/stdint.h ./src/lib/kernel/print.h ./src/lib/kernel/bitmap.h ./src/kernel/global.h ./src/kernel/debug.h ./src/lib/string.h
 	$(CC) $(CFLAGS) $< -o $@
 
 # 编译汇编代码
