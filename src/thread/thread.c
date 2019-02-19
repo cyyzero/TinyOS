@@ -11,6 +11,7 @@ static void kernel_thread(thread_func* function, void* func_arg)
     function(func_arg);
 }
 
+// 修改self_kstack以及thread_stack，并将函数指针和参数的赋值。
 void thread_create(struct task_struct* pthread, thread_func function, void* func_arg)
 {
     pthread->self_kstack -= sizeof(struct intr_stack);
@@ -22,6 +23,7 @@ void thread_create(struct task_struct* pthread, thread_func function, void* func
     kthread_stack->ebp = kthread_stack->ebx = kthread_stack->esi = kthread_stack->edi = 0;
 }
 
+// 初始化task_struct的成员
 void thread_init(struct task_struct* pthread,const char* name, int prio)
 {
     memset(pthread, 0, sizeof(*pthread));
@@ -32,6 +34,7 @@ void thread_init(struct task_struct* pthread,const char* name, int prio)
     pthread->stack_magic = 0x19971224;       // 自定义的魔数
 }
 
+// 创建thread并运行它
 struct task_struct* thread_start(const char* name, int prio, thread_func function, void* func_arg)
 {
     struct task_struct* thread = get_kernel_pages(1);
