@@ -81,11 +81,34 @@ static void pic_init(void)
 // 通用的中断处理程序，一般在异常出现时处理
 static void general_intr_handler(uint8_t vec_nr)
 {
+    // IRQ7和IRQ15会产生伪中断(spurious interrupt)，无需处理
     if (vec_nr == 0x27 || vec_nr == 0x2f)
         return;
-    put_str("int vector: 0x");
-    put_int(vec_nr);
-    put_char('\n');
+
+    // set_cursor定义在print.S中
+    set_cursor(0);
+    for (int cursor_pos = 0; cursor_pos < 320; ++cursor_pos)
+    {
+        put_char(' ');
+    }
+    set_cursor(0);
+    put_str("!!!!!      exception message begin      !!!!!\n");
+    set_cursor(88);                          // 第二行第八个字符
+    put_str(intr_name[vec_nr]);
+    if (vec_nr == 14)                        // page fault
+    {
+        // cr2中存放造成page_fault的地址。放进page_fault_vaddr
+        uint32_t page_fault_vaddr = 0;
+        asm ("movl %%cr2, %0" : "=r" (page_fault_vaddr));
+        put_str("\npage fault addr is ");
+        put_int(page_fault_vaddr);
+    }
+
+    put_str("!!!!!      exception message end      !!!!!\n");
+
+    // 能进入中断处理程序就表示已经处在关中断的情况下。下面的死循环不会被中断。
+    for (;;)
+        ;
 }
 
 // 初始化中断向量和中断名表
@@ -163,6 +186,12 @@ enum intr_status intr_get_status(void)
     uint32_t eflags = 0;
     GET_EFLAGS(eflags);
     return (eflags & EFLAGS_IF) ? INTR_ON : INTR_OFF;
+}
+
+// 注册中断处理函数
+void register_handler(uint8_t vector_no, intr_handler function)
+{
+    idt_table[vector_no] = function;
 }
 
 // 完成中断相关的初始化工作
