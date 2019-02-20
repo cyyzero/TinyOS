@@ -113,3 +113,26 @@ put_char:
     popad                                    ; 恢复之前压入的寄存器
     ret
 
+global set_cursor
+set_cursor:
+    pushad
+    mov bx, [esp + 36]                      ; pushad压入4*8=32字节，加上调用者的4字节返回地址
+
+    ; 设置高8位
+    mov dx, 0x03d4
+    mov al, 0x0e
+    out dx, al
+    mov dx, 0x03d5
+    mov al, bh
+    out dx, al
+
+    ; 设置低8位
+    mov dx, 0x03d4
+    mov al, 0x0f
+    out dx, al
+    mov dx, 0x03d5
+    mov al, bl
+    out dx, al
+
+    popad                                    ; 恢复之前压入的寄存器
+    ret
