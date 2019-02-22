@@ -36,7 +36,7 @@ static void kernel_thread(thread_func* function, void* func_arg)
 // 修改self_kstack以及thread_stack，并将函数指针和参数的赋值。
 void thread_create(struct task_struct* pthread, thread_func function, void* func_arg)
 {
-    pthread->self_kstack -= sizeof(struct intr_stack);
+    // pthread->self_kstack -= sizeof(struct intr_stack);
     pthread->self_kstack -= sizeof(struct thread_stack);
     struct thread_stack* kthread_stack = (struct thread_stack*)pthread->self_kstack;
     kthread_stack->eip = kernel_thread;

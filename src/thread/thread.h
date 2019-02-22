@@ -50,6 +50,7 @@ struct thread_stack
     uint32_t edi;
     uint32_t esi;
 
+    // 线程第一次执行时，eip指向线程函数；之后，eip指向switch_to返回地址
     void (*eip)(thread_func* func, void* func_arg);
 
     // 以下仅供第一次被调度上cpu时使用
@@ -69,7 +70,7 @@ struct task_struct
     uint8_t ticks;                           // 每次在处理器上执行的时间滴答数
     uint32_t elapsed_ticks;                  // 此任务自上cpu运行后至今占用了多少cpu滴答数
 
-    struct list_elem general_tag;             // 用于表示线程在一般的队列中的节点
+    struct list_elem general_tag;            // 用于表示线程在一般的队列中的节点
     struct list_elem all_list_tag;           // 用于表示线程队列thread_all_list中的节点
 
     uint32_t* pgdir;                         // 进程自己页表的虚拟地址
