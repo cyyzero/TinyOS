@@ -83,6 +83,10 @@ void init_thread(struct task_struct* pthread,const char* name, int prio);
 struct task_struct* thread_start(const char* name, int prio, thread_func function, void* func_arg);
 void schedule(void);
 void switch_to(struct task_struct* curr, struct task_struct* next);
+
+void thread_block(enum task_status status);
+void thread_unblock(struct task_struct* pthread);
+
 void thread_init(void);
 
 #endif // __THREAD_THREAD_H

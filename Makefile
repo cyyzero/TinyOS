@@ -10,7 +10,7 @@ LDFLAGS = -m elf_i386 -Ttext $(ENTRY_POINT) -e main -Map $(BIN_DIR)/kernel.map
 OBJS = $(BIN_DIR)/main.o $(BIN_DIR)/init.o $(BIN_DIR)/interrupt.o $(BIN_DIR)/timer.o \
 	$(BIN_DIR)/kernel.o $(BIN_DIR)/print1.o $(BIN_DIR)/print2.o $(BIN_DIR)/debug.o  \
 	$(BIN_DIR)/string.o $(BIN_DIR)/bitmap.o $(BIN_DIR)/memory.o $(BIN_DIR)/thread.o \
-	$(BIN_DIR)/list.o $(BIN_DIR)/switch.o
+	$(BIN_DIR)/list.o $(BIN_DIR)/switch.o $(BIN_DIR)/sync.o
 
 # C代码编译
 $(BIN_DIR)/main.o: ./src/kernel/main.c ./src/lib/kernel/print.h ./src/kernel/init.h ./src/thread/thread.h ./src/kernel/interrupt.h
@@ -44,6 +44,9 @@ $(BIN_DIR)/thread.o: ./src/thread/thread.c ./src/thread/thread.h ./src/lib/stdin
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BIN_DIR)/list.o: ./src/lib/kernel/list.c ./src/lib/kernel/list.h ./src/kernel/interrupt.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BIN_DIR)/sync.o: ./src/thread/sync.c ./src/thread/sync.h ./src/lib/kernel/list.h ./src/thread/thread.h ./src/thread/thread.h ./src/kernel/debug.h ./src/kernel/interrupt.h
 	$(CC) $(CFLAGS) $< -o $@
 
 # 编译汇编代码
