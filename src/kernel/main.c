@@ -2,6 +2,7 @@
 #include "init.h"
 #include "thread.h"
 #include "interrupt.h"
+#include "console.h"
 
 void k_thread_a(void* arg);
 void k_thread_b(void* arg);
@@ -17,7 +18,7 @@ void main(void)
     intr_enable();
 
     for (;;)
-        put_str("Main ");
+        console_put_str("Main ");
 }
 
 void k_thread_a(void* arg)
@@ -25,6 +26,6 @@ void k_thread_a(void* arg)
     char* para = arg;
     for (;;)
     {
-        put_str(para);
+        console_put_str(para);
     }
 }
