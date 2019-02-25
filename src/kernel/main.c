@@ -12,13 +12,13 @@ void main(void)
     put_str("I am kernel\n");
     init_all();
 
-    thread_start("k_thread_a", 31, k_thread_a, "argA ");
-    thread_start("k_thread_b", 8,  k_thread_a, "argB ");
+    // thread_start("k_thread_a", 31, k_thread_a, "argA ");
+    // thread_start("k_thread_b", 8,  k_thread_a, "argB ");
 
     intr_enable();
 
-    for (;;)
-        console_put_str("Main ");
+    for (;;);
+        // console_put_str("Main ");
 }
 
 void k_thread_a(void* arg)

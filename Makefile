@@ -10,13 +10,14 @@ LDFLAGS = -m elf_i386 -Ttext $(ENTRY_POINT) -e main -Map $(BIN_DIR)/kernel.map
 OBJS = $(BIN_DIR)/main.o $(BIN_DIR)/init.o $(BIN_DIR)/interrupt.o $(BIN_DIR)/timer.o \
 	$(BIN_DIR)/kernel.o $(BIN_DIR)/print1.o $(BIN_DIR)/print2.o $(BIN_DIR)/debug.o  \
 	$(BIN_DIR)/string.o $(BIN_DIR)/bitmap.o $(BIN_DIR)/memory.o $(BIN_DIR)/thread.o \
-	$(BIN_DIR)/list.o $(BIN_DIR)/switch.o $(BIN_DIR)/sync.o $(BIN_DIR)/console.o
+	$(BIN_DIR)/list.o $(BIN_DIR)/switch.o $(BIN_DIR)/sync.o $(BIN_DIR)/console.o \
+	$(BIN_DIR)/keyboard.o
 
 # C代码编译
 $(BIN_DIR)/main.o: ./src/kernel/main.c ./src/lib/kernel/print.h ./src/kernel/init.h ./src/thread/thread.h ./src/kernel/interrupt.h ./src/device/console.h
 	$(CC) $(CFLAGS) $< -o $@
 
-$(BIN_DIR)/init.o: ./src/kernel/init.c ./src/kernel/init.h ./src/lib/kernel/print.h ./src/lib/stdint.h ./src/kernel/interrupt.h ./src/device/timer.h ./src/kernel/memory.h ./src/thread/thread.h ./src/device/console.h
+$(BIN_DIR)/init.o: ./src/kernel/init.c ./src/kernel/init.h ./src/lib/kernel/print.h ./src/lib/stdint.h ./src/kernel/interrupt.h ./src/device/timer.h ./src/kernel/memory.h ./src/thread/thread.h ./src/device/console.h ./src/device/keyboard.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BIN_DIR)/interrupt.o: ./src/kernel/interrupt.c ./src/kernel/interrupt.h ./src/lib/stdint.h ./src/kernel/global.h ./src/lib/kernel/io.h ./src/lib/kernel/print.h
@@ -50,6 +51,9 @@ $(BIN_DIR)/sync.o: ./src/thread/sync.c ./src/thread/sync.h ./src/lib/kernel/list
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BIN_DIR)/console.o: ./src/device/console.c ./src/device/console.h ./src/lib/kernel/print.h ./src/lib/stdint.h ./src/thread/sync.h ./src/thread/thread.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BIN_DIR)/keyboard.o: ./src/device/keyboard.c ./src/device/keyboard.h ./src/lib/kernel/print.h ./src/kernel/interrupt.h ./src/lib/kernel/io.h ./src/kernel/global.h
 	$(CC) $(CFLAGS) $< -o $@
 
 # 编译汇编代码

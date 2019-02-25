@@ -9,7 +9,7 @@
 #define PIC_S_CTRL 0xa0                      // 从片控制端口为0xa0
 #define PIC_S_DATA 0xa1                      // 从片数据端口为0xa1
 
-#define IDT_DESC_CNT 0x21
+#define IDT_DESC_CNT 0x30
 
 #define EFLAGS_IF 0x00000200                 // eflags寄存器中的if位为1
 #define GET_EFLAGS(EFLAG_VAR) asm volatile ("pushfl; popl %0" : "=g" (EFLAG_VAR))
@@ -31,7 +31,7 @@ extern intr_handler intr_entry_table[IDT_DESC_CNT];
 static struct gate_desc idt[IDT_DESC_CNT];
 
 // 用于保存异常的名字
-char* intr_name[IDT_DESC_CNT];
+const char* intr_name[IDT_DESC_CNT];
 
 // 定义中断处理程序数组
 intr_handler idt_table[IDT_DESC_CNT];
