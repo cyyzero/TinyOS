@@ -4,6 +4,7 @@
 #include "interrupt.h"
 #include "io.h"
 #include "global.h"
+#include "ioqueue.h"
 
 // 键盘buffer寄存器端口号为0x60
 #define KBD_BUF_PORT 0x60
@@ -36,10 +37,8 @@
 #define ctrl_r_break     0xe09d
 #define caps_lock_make   0x3a
 
-// 记录相应的按键是否按下
-static bool ctrl_status, shift_status, alt_status, caps_lock_status;
-// 记录makecode是否以0xe0开头
-static bool ext_scancode;
+// 定义键盘缓冲队列
+struct ioqueue keyboard_buffer;
 
 // 以通码make_code为索引的二维数组，根据我的电脑的按键设置。但在我电脑上按不了ctrl
 static char keymap[][2] = {
@@ -107,6 +106,11 @@ static char keymap[][2] = {
 // 键盘中断处理程序
 static void intr_keyboard_handler(void)
 {
+    // 记录相应的按键是否按下
+    static bool ctrl_status, shift_status, alt_status, caps_lock_status;
+    // 记录makecode是否以0xe0开头
+    static bool ext_scancode;
+
     bool ctrl_down_last = ctrl_status;
     bool shift_down_last = shift_status;
     bool caps_lock_last = caps_lock_status;
@@ -180,7 +184,11 @@ static void intr_keyboard_handler(void)
 
         if (curr_char)
         {
-            put_char(curr_char);
+            if (!ioq_full(&keyboard_buffer))
+            {
+                put_char(curr_char);
+                ioq_putchar(&keyboard_buffer, curr_char);
+            }
             return;
         }
 
@@ -212,6 +220,7 @@ static void intr_keyboard_handler(void)
 void keyboard_init(void)
 {
     put_str("keyboard init start\n");
+    ioqueue_init(&keyboard_buffer);
     register_handler(0x21, intr_keyboard_handler);
     put_str("keyboard init done\n");
 }
