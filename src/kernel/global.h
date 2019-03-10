@@ -33,12 +33,12 @@
 #define SELECTOR_K_DATA  ((2 << 3) + (TI_GDT << 2) + RPL0)
 #define SELECTOR_K_STACK SELECTOR_K_DATA
 #define SELECTOR_K_GS    ((3 << 3) + (TI_GDT << 2) + RPL0)
-// 第四个段描述符是显存；第四个是tss
+// 第3个段描述符是显存；第4个是tss
 #define SELECTOR_U_CODE  ((5 << 3) + (TI_GDT << 2) + RPL3)
 #define SELECTOR_U_DATA  ((6 << 3) + (TI_GDT << 2) + RPL3)
 #define SELECTOR_U_STACK SELECTOR_U_DATA
 
-#define GDT_ATTR_HIGH                ((DESC_G_4k << 7) + (DESC_D_32 << 6) + (DESC_L << 5) + (DESC_ABL << 4))
+#define GDT_ATTR_HIGH                ((DESC_G_4k << 7) + (DESC_D_32 << 6) + (DESC_L << 5) + (DESC_AVL << 4))
 #define GDT_CODE_ATTR_LOW_DPL3       ((DESC_P << 7) + (DESC_DPL_3 << 5) + (DESC_S_CODE << 4) + DESC_TYPE_CODE)
 #define GDT_DATA_ATTR_LOW_DPL3       ((DESC_P << 7) + (DESC_DPL_3 << 5) + (DESC_S_DATA << 4) + DESC_TYPE_DATA)
 
