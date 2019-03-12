@@ -49,11 +49,11 @@ void update_tss_esp(struct task_struct* pthread)
 void make_gdt_desc(struct gdt_desc* desc, uint32_t desc_addr, uint32_t limit, uint8_t attr_low, uint8_t attr_high)
 {
     desc->limit_low_word = limit & 0x0000ffff;
-    desc->base_low_word  = desc_base & 0x0000ffff;
-    desc->base_mid_byte  = (desc_base & 0x00ff0000) >> 16;
+    desc->base_low_word  = desc_addr & 0x0000ffff;
+    desc->base_mid_byte  = (desc_addr & 0x00ff0000) >> 16;
     desc->attr_low_byte  = attr_low;
     desc->limit_high_attr_high = ((limit & 0x000f0000) >> 16) + (uint8_t)attr_high;
-    desc->base_high_byte = desc_base >> 24;
+    desc->base_high_byte = desc_addr >> 24;
 }
 
 // 在gdt中创建tss并重新加载gdt
@@ -66,13 +66,13 @@ void tss_init(void)
     tss.ss0 = SELECTOR_K_STACK;
     tss.io_base = tss_size;
 
-    // gdt段基质为0x900，把tss放在第四个位置，既0x900+0x20
-
+    // gdt段基质为0x900，把tss放在第四个位置，既0x900+0x20。DPL为0
     make_gdt_desc((struct gdt_desc*)0xc0000920, (uint32_t)&tss, tss_size-1, TSS_ATTR_LOW, TSS_ATTR_HIGH);
+    // 添加DPL为3的数据段和代码段描述符
     make_gdt_desc((struct gdt_desc*)0xc0000928, 0, 0xfffff, GDT_CODE_ATTR_LOW_DPL3, GDT_ATTR_HIGH);
     make_gdt_desc((struct gdt_desc*)0xc0000930, 0, 0xfffff, GDT_CODE_ATTR_LOW_DPL3, GDT_ATTR_HIGH);
 
-    uint32_t gdt_operand = ((8 * 7 - 1) | ((uint32_t)0xc0000900 << 16));
+    uint64_t gdt_operand = ((8 * 7 - 1) | ((uint64_t)0xc0000900 << 16));
     asm volatile ("lgdt %0" : : "m" (gdt_operand));
     asm volatile ("ltr %w0" : : "r" (SELECTOR_TSS));
     put_str("tss_init and ltr done\n");
