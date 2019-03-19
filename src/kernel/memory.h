@@ -33,4 +33,8 @@ uint32_t* pte_ptr(void* vaddr);
 uint32_t* pde_ptr(void* vaddr);
 void* malloc_page(enum pool_flags pf, uint32_t pg_cnt);
 void* get_kernel_pages(uint32_t pg_cnt);
+void* get_user_pages(uint32_t pg_cnt);
+void* get_a_page(enum pool_flags pf, uint32_t vaddr);
+uint32_t addr_v2p(void* vaddr);
+
 #endif // __KERNEL_MEMORY_H

@@ -43,7 +43,7 @@ $(BIN_DIR)/string.o: ./src/lib/string.c ./src/lib/string.h ./src/kernel/global.h
 $(BIN_DIR)/bitmap.o: ./src/lib/kernel/bitmap.c ./src/lib/kernel/bitmap.h ./src/lib/stdint.h ./src/lib/string.h ./src/lib/kernel/print.h ./src/kernel/interrupt.h ./src/kernel/debug.h
 	$(CC) $(CFLAGS) $< -o $@
 
-$(BIN_DIR)/memory.o: ./src/kernel/memory.c ./src/kernel/memory.h ./src/lib/stdint.h ./src/lib/kernel/print.h ./src/lib/kernel/bitmap.h ./src/kernel/global.h ./src/kernel/debug.h ./src/lib/string.h
+$(BIN_DIR)/memory.o: ./src/kernel/memory.c ./src/kernel/memory.h ./src/lib/stdint.h ./src/lib/kernel/print.h ./src/lib/kernel/bitmap.h ./src/kernel/global.h ./src/kernel/debug.h ./src/lib/string.h ./src/thread/sync.h ./src/thread/thread.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BIN_DIR)/thread.o: ./src/thread/thread.c ./src/thread/thread.h ./src/lib/stdint.h ./src/lib/string.h ./src/kernel/global.h ./src/kernel/memory.h ./src/kernel/debug.h ./src/lib/kernel/list.h ./src/kernel/interrupt.h ./src/lib/kernel/print.h

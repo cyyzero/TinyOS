@@ -3,6 +3,7 @@
 
 #include "stdint.h"
 #include "list.h"
+#include "memory.h"
 
 typedef void thread_func(void*);
 
@@ -74,6 +75,7 @@ struct task_struct
     struct list_elem all_list_tag;           // 用于表示线程队列thread_all_list中的节点
 
     uint32_t* pgdir;                         // 进程自己页表的虚拟地址
+    struct virtual_addr userprog_vaddr;      // 用户进程的虚拟地址
     uint32_t stack_magic;                    // 栈的边界标记，用于检测栈的溢出
 };
 
