@@ -71,5 +71,18 @@ struct gdt_desc
 // DPL为3的中段描述符的属性字段
 #define IDT_DESC_ATTR_DPL3 ((IDT_DESC_P << 7) + (IDT_DESC_DPL3 << 5) + (IDT_DESC_S << 4) + IDT_DESC_32_TYPE)
 
+#define EFLAGS_MBS    (1 << 1)
+#define EFLAGS_IF_1   (1 << 9)
+#define EFLAGS_IF_0   (0 << 9)
+#define EFLAGS_IOPL_3 (3 << 12)
+#define EFLAGS_IPOL_0 (0 << 12)
+
 #define PG_SIZE 4096
+
+#define NULL  ((void*)0)
+#define bool  _Bool
+#define true  1
+#define false 0
+
 #endif // __KERNEL_GLOBAL_H
+
