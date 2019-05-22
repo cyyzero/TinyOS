@@ -25,10 +25,10 @@ void console_release(void)
 }
 
 // 终端输出字符
-void console_put_char(uint8_t char_asci)
+void console_put_char(uint8_t char_ascii)
 {
     console_acquire();
-    put_char(char_asci);
+    put_char(char_ascii);
     console_release();
 }
 
