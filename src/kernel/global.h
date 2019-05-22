@@ -75,9 +75,11 @@ struct gdt_desc
 #define EFLAGS_IF_1   (1 << 9)
 #define EFLAGS_IF_0   (0 << 9)
 #define EFLAGS_IOPL_3 (3 << 12)
-#define EFLAGS_IPOL_0 (0 << 12)
+#define EFLAGS_IOPL_0 (0 << 12)
 
 #define PG_SIZE 4096
+
+#define DIV_ROUND_UP(x, step) ((x + step - 1) / (step))
 
 #define NULL  ((void*)0)
 #define bool  _Bool
