@@ -66,12 +66,13 @@ void tss_init(void)
     tss.ss0 = SELECTOR_K_STACK;
     tss.io_base = tss_size;
 
-    // gdt段基质为0x900，把tss放在第四个位置，既0x900+0x20。DPL为0
+    // gdt段基址为0x900，把tss放在第四个位置，既0x900+0x20。DPL为0
     make_gdt_desc((struct gdt_desc*)0xc0000920, (uint32_t)&tss, tss_size-1, TSS_ATTR_LOW, TSS_ATTR_HIGH);
     // 添加DPL为3的数据段和代码段描述符
     make_gdt_desc((struct gdt_desc*)0xc0000928, 0, 0xfffff, GDT_CODE_ATTR_LOW_DPL3, GDT_ATTR_HIGH);
-    make_gdt_desc((struct gdt_desc*)0xc0000930, 0, 0xfffff, GDT_CODE_ATTR_LOW_DPL3, GDT_ATTR_HIGH);
+    make_gdt_desc((struct gdt_desc*)0xc0000930, 0, 0xfffff, GDT_DATA_ATTR_LOW_DPL3, GDT_ATTR_HIGH);
 
+    // 七个gdt描述符
     uint64_t gdt_operand = ((8 * 7 - 1) | ((uint64_t)0xc0000900 << 16));
     asm volatile ("lgdt %0" : : "m" (gdt_operand));
     asm volatile ("ltr %w0" : : "r" (SELECTOR_TSS));
