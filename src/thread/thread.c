@@ -7,6 +7,7 @@
 #include "list.h"
 #include "interrupt.h"
 #include "print.h"
+#include "process.h"
 
 #define PG_SIZE 4096
 
@@ -34,9 +35,9 @@ static void kernel_thread(thread_func* function, void* func_arg)
 }
 
 // 修改self_kstack以及thread_stack，并将函数指针和参数的赋值。
-void thread_create(struct task_struct* pthread, thread_func function, void* func_arg)
+void thread_create(struct task_struct* pthread, thread_func* function, void* func_arg)
 {
-    // pthread->self_kstack -= sizeof(struct intr_stack);
+    pthread->self_kstack -= sizeof(struct intr_stack);
     pthread->self_kstack -= sizeof(struct thread_stack);
     struct thread_stack* kthread_stack = (struct thread_stack*)pthread->self_kstack;
     kthread_stack->eip = kernel_thread;
@@ -46,7 +47,7 @@ void thread_create(struct task_struct* pthread, thread_func function, void* func
 }
 
 // 初始化task_struct的成员
-void init_thread(struct task_struct* pthread,const char* name, int prio)
+void init_thread(struct task_struct* pthread, const char* name, int prio)
 {
     memset(pthread, 0, sizeof(*pthread));
     strcpy(pthread->name, name);
@@ -112,6 +113,9 @@ void schedule(void)
     thread_tag = list_pop(&thread_ready_list);
     struct task_struct* next = elem2entry(struct task_struct, general_tag, thread_tag);
     next->status = TASK_RUNNING;
+
+    process_activate(next);
+
     switch_to(curr, next);
 }
 
