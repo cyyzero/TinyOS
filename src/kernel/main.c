@@ -12,16 +12,16 @@ void k_thread_b(void* arg);
 void u_prog_a(void);
 void u_prog_b(void);
 
-int test_var_a = 0, test_var_b = 0;
+static int test_var_a = 0, test_var_b = 0;
 
 void main(void)
 {
     put_str("I am kernel\n");
     init_all();
 
-    // thread_start("k_thread_a", 31, k_thread_a, "argA ");
-    // thread_start("k_thread_b", 31, k_thread_b, "argB ");
-    // process_execute(u_prog_a, "user_prog_a");
+    thread_start("k_thread_a", 31, k_thread_a, "argA ");
+    process_execute(u_prog_a, "user_prog_a");
+    thread_start("k_thread_b", 31, k_thread_b, "argB ");
     process_execute(u_prog_b, "user_prog_b");
     intr_enable();
 

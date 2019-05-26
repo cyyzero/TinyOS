@@ -9,8 +9,8 @@ void idt_init(void);
 
 enum intr_status
 {
-    INTR_ON,
-    INTR_OFF
+    INTR_OFF,
+    INTR_ON
 };
 
 enum intr_status intr_get_status(void);

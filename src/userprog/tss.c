@@ -33,9 +33,9 @@ struct tss
     uint32_t fs;
     uint32_t gs;
     uint32_t ldt;
-    uint32_t trance;
+    uint32_t trace;
     uint32_t io_base;
-};
+}; 
 
 static struct tss tss;
 
