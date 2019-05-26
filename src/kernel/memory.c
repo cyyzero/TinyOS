@@ -179,7 +179,7 @@ void* get_kernel_pages(uint32_t pg_cnt)
     return vaddr;
 }
 
-// 在用户空间中申请4k内存，并返回其虚拟地址
+// 在用户空间内存池中申请pg_cnt页内存，成功则返回其虚拟地址；失败则返回NULL
 void* get_user_pages(uint32_t pg_cnt)
 {
     lock_acquire(&user_pool.lock);
