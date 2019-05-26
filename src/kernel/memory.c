@@ -16,15 +16,6 @@
 #define PDE_IDX(addr) ((addr & 0xffc00000) >> 22)  // 得到页目录项的index
 #define PTE_IDX(addr) ((addr & 0x003ff000) >> 12)  // 得到页表项的index
 
-// 内存池结构
-struct pool
-{
-    struct bitmap pool_bitmap;               // 用于管理内存的位图
-    uint32_t phy_addr_start;                 // 所管理内存的起始物理地址
-    uint32_t pool_size;                      // 本内存池字节容量
-    struct lock lock;
-};
-
 struct pool kernel_pool, user_pool;
 struct virtual_addr kernel_vaddr;
 

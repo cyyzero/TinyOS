@@ -3,7 +3,8 @@
 
 #include "list.h"
 #include "stdint.h"
-#include "thread.h"
+
+struct task_struct;
 
 // 信号量结构
 struct semaphore

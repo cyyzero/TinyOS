@@ -3,6 +3,7 @@
 
 #include "stdint.h"
 #include "bitmap.h"
+#include "sync.h"
 
 // 内存池标记
 enum pool_flags
@@ -17,6 +18,15 @@ enum pool_flags
 #define PG_RW_W 2    // R/W属性位，读/写/执行
 #define PG_US_S 0    // U/S属性位，系统级
 #define PG_US_U 4    // U/S属性位，用户级
+
+// 内存池结构
+struct pool
+{
+    struct bitmap pool_bitmap;               // 用于管理内存的位图
+    uint32_t phy_addr_start;                 // 所管理内存的起始物理地址
+    uint32_t pool_size;                      // 本内存池字节容量
+    struct lock lock;
+};
 
 // 虚拟地址池，用于管理虚拟地址
 struct virtual_addr
