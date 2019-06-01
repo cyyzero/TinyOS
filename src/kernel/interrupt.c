@@ -9,7 +9,7 @@
 #define PIC_S_CTRL 0xa0                      // 从片控制端口为0xa0
 #define PIC_S_DATA 0xa1                      // 从片数据端口为0xa1
 
-#define IDT_DESC_CNT 0x30
+#define IDT_DESC_CNT 0x81
 
 #define EFLAGS_IF 0x00000200                 // eflags寄存器中的if位为1
 #define GET_EFLAGS(EFLAG_VAR) asm volatile ("pushfl; popl %0" : "=g" (EFLAG_VAR))
@@ -26,6 +26,8 @@ struct gate_desc
 
 // 定义在kernel.S中的中断处理函数入口数组
 extern intr_handler intr_entry_table[IDT_DESC_CNT];
+
+extern uint32_t syscall_handler(void);
 
 // 中断描述符表
 static struct gate_desc idt[IDT_DESC_CNT];
@@ -51,6 +53,9 @@ static void idt_desc_init(void)
 {
     for (int i = 0; i < IDT_DESC_CNT; ++i)
         make_idt_desc(&idt[i], IDT_DESC_ATTR_DPL0, intr_entry_table[i]);
+
+    // 系统调用的中断门DPL为3
+    make_idt_desc(&idt[IDT_DESC_CNT-1], IDT_DESC_ATTR_DPL3, syscall_handler);
     put_str("   idt_desc_init done\n");
 }
 

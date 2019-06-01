@@ -8,9 +8,11 @@
 #include "interrupt.h"
 #include "print.h"
 #include "process.h"
+#include "sync.h"
 
 #define PG_SIZE 4096
 
+struct lock pid_lock;                        // 分配pid锁
 struct task_struct* main_thread;             // 主线程PCB
 struct list thread_ready_list;               // 就绪队列
 struct list thread_all_list;                 // 所有任务队列
@@ -24,6 +26,16 @@ struct task_struct* running_thread(void)
     uint32_t esp;
     asm ("mov %%esp, %0" : "=g" (esp));
     return (struct task_struct*)(esp & 0xfffff000);
+}
+
+// 分配pid
+static pid_t allocate_pid(void)
+{
+    static pid_t next_pid = 0;
+    lock_acquire(&pid_lock);
+    ++next_pid;
+    lock_release(&pid_lock);
+    return next_pid;
 }
 
 // 由kernel_thread去执行function
@@ -50,6 +62,7 @@ void thread_create(struct task_struct* pthread, thread_func* function, void* fun
 void init_thread(struct task_struct* pthread, const char* name, int prio)
 {
     memset(pthread, 0, sizeof(*pthread));
+    pthread->pid = allocate_pid();
     strcpy(pthread->name, name);
     pthread->status = (pthread == main_thread) ? TASK_RUNNING : TASK_READY;
     pthread->self_kstack = (uint32_t*)((uint32_t)pthread + PG_SIZE);
@@ -156,6 +169,7 @@ void thread_init(void)
 
     list_init(&thread_all_list);
     list_init(&thread_ready_list);
+    lock_init(&pid_lock);
 
     make_main_thread();
 

@@ -5,6 +5,7 @@
 #include "list.h"
 #include "memory.h"
 
+typedef int16_t pid_t;
 typedef void thread_func(void*);
 
 // 进程或线程的状态
@@ -64,6 +65,7 @@ struct thread_stack
 struct task_struct
 {
     uint32_t* self_kstack;                   // 内核线程自己的内核栈
+    pid_t pid;
     enum task_status status;
     char name[16];
 
