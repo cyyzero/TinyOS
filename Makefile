@@ -14,7 +14,7 @@ OBJS = $(BIN_DIR)/main.o $(BIN_DIR)/init.o $(BIN_DIR)/interrupt.o $(BIN_DIR)/tim
 	$(BIN_DIR)/string.o $(BIN_DIR)/bitmap.o $(BIN_DIR)/memory.o $(BIN_DIR)/thread.o \
 	$(BIN_DIR)/list.o $(BIN_DIR)/switch.o $(BIN_DIR)/sync.o $(BIN_DIR)/console.o \
 	$(BIN_DIR)/keyboard.o $(BIN_DIR)/ioqueue.o $(BIN_DIR)/tss.o $(BIN_DIR)/process.o \
-	$(BIN_DIR)/syscall.o $(BIN_DIR)/syscall_init.o
+	$(BIN_DIR)/syscall.o $(BIN_DIR)/syscall_init.o $(BIN_DIR)/stdio.o
 
 
 # 链接所有目标
@@ -24,7 +24,8 @@ $(BIN_DIR)/kernel.bin: $(OBJS)
 # C代码编译
 $(BIN_DIR)/main.o: ./src/kernel/main.c ./src/lib/kernel/print.h ./src/kernel/init.h \
 ./src/thread/thread.h ./src/kernel/interrupt.h ./src/device/console.h ./src/device/keyboard.h \
-./src/device/ioqueue.h ./src/userprog/process.h ./src/lib/user/syscall.h  ./src/userprog/syscall_init.h
+./src/device/ioqueue.h ./src/userprog/process.h ./src/lib/user/syscall.h  ./src/userprog/syscall_init.h \
+./src/lib/stdio.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BIN_DIR)/init.o: ./src/kernel/init.c ./src/kernel/init.h ./src/lib/kernel/print.h \
@@ -94,11 +95,16 @@ $(BIN_DIR)/process.o: ./src/userprog/process.c ./src/userprog/process.h ./src/th
 ./src/kernel/memory.h ./src/lib/kernel/bitmap.h ./src/kernel/debug.h ./src/kernel/interrupt.h ./src/device/console.h ./src/lib/string.h
 	$(CC) $(CFLAGS) $< -o $@
 
-$(BIN_DIR)/syscall.o: ./src/lib/user/syscall.c ./src/lib/user/syscall.h
+$(BIN_DIR)/syscall.o: ./src/lib/user/syscall.c ./src/lib/user/syscall.h ./src/device/console.h \
+./src/lib/string.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BIN_DIR)/syscall_init.o: ./src/userprog/syscall_init.c ./src/userprog/syscall_init.h \
 ./src/lib/user/syscall.h ./src/lib/kernel/print.h ./src/userprog/process.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BIN_DIR)/stdio.o: ./src/lib/stdio.c ./src/lib/stdio.h ./src/lib/string.h ./src/lib/stdint.h \
+./src/lib/user/syscall.h
 	$(CC) $(CFLAGS) $< -o $@
 
 # 编译汇编代码

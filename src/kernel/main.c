@@ -8,6 +8,7 @@
 #include "process.h"
 #include "syscall.h"
 #include "syscall_init.h"
+#include "stdio.h"
 
 void k_thread_a(void* arg);
 void k_thread_b(void* arg);
@@ -43,9 +44,6 @@ void k_thread_a(void* arg)
     console_put_str(" thread_a_pid:0x");
     console_put_int(sys_getpid());
     console_put_char('\n');
-    console_put_str(" prog_a_pid:0x");
-    console_put_int(prog_a_pid);
-    console_put_char('\n');
     for (;;)
         ;
 }
@@ -56,23 +54,22 @@ void k_thread_b(void* arg)
     console_put_str(" thread_b_pid:0x");
     console_put_int(sys_getpid());
     console_put_char('\n');
-    console_put_str(" prog_b_pid:0x");
-    console_put_int(prog_b_pid);
-    console_put_char('\n');
     for (;;)
         ;
 }
 
 void u_prog_a(void)
 {
-    prog_a_pid = getpid();
+    printf(" I am %s, my pid:%d%c", "prog_a", getpid(), '\n');
     for (;;)
         ;
 }
 
 void u_prog_b(void)
 {
-    prog_b_pid = getpid();
+    printf(" I am %s, my pid:%d%c", "prog_b", getpid(), '\n');
+    printf(" The minnum int32_t is %d\n", -0x7fffffff-1);
+    printf("%d\n", -1);
     for (;;)
         ;
 }

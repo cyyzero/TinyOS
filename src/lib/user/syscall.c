@@ -44,3 +44,8 @@ uint32_t getpid(void)
 {
     return _SYSCALL0(SYS_GETPID);
 }
+
+uint32_t write(const char* str)
+{
+    return _SYSCALL1(SYS_WRITE, str);
+}
