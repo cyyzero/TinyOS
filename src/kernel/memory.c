@@ -16,8 +16,29 @@
 #define PDE_IDX(addr) ((addr & 0xffc00000) >> 22)  // 得到页目录项的index
 #define PTE_IDX(addr) ((addr & 0x003ff000) >> 12)  // 得到页表项的index
 
+struct arena
+{
+    struct mem_block_desc* desc;
+    uint32_t cnt;
+    bool large;
+};
+
+struct mem_block_desc k_block_descs[DESC_CNT];
 struct pool kernel_pool, user_pool;
 struct virtual_addr kernel_vaddr;
+
+// 初始化mem_block_desc
+void block_desc_init(struct mem_block_desc* desc_array)
+{
+    for (uint16_t desc_idx = 0, block_size = 16;
+         desc_idx < DESC_CNT;
+         ++desc_idx, block_size *= 2)
+    {
+        desc_array[desc_idx].block_size = block_size;
+        desc_array[desc_idx].blocks_per_arena = (PG_SIZE - sizeof(struct arena)) / block_size;
+        list_init(&desc_array[desc_idx].free_list);
+    }
+}
 
 // 初始化struct pool
 static void pool_init(struct pool* pool, uint8_t* btmp_bits, uint32_t btmp_len, uint32_t pool_start, uint32_t pool_size)
@@ -272,10 +293,22 @@ put_char('\n');
     put_str("   mem_pool_init done\n");
 }
 
+static struct mem_block* arena2block(struct arena* a, uint32_t idx)
+{
+    return (struct mem_block*)((uint32_t)a + sizeof(struct arena) + idx * a->desc->block_size);
+}
+
+// 返回内存块b所在的arena地址
+static struct arena* block2arena(struct mem_block* b)
+{
+    return (struct arena*)((uint32_t)b & 0xfffff000);
+}
+
 void mem_init(void)
 {
     put_str("mem_init start\n");
     uint32_t mem_bytes_total = *((uint32_t*)0xb00);
     mem_pool_init(mem_bytes_total);
+    block_desc_init(k_block_descs);
     put_str("mem_init finish\n");
 }

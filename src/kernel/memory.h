@@ -35,9 +35,27 @@ struct virtual_addr
     uint32_t vaddr_start;                    // 虚拟地址起始地址
 };
 
+// 内存块
+struct mem_block
+{
+    struct list_elem free_elem;
+};
+
+// 内存块描述符
+struct mem_block_desc
+{
+    uint32_t block_size;
+    uint32_t blocks_per_arena;
+    struct list free_list;
+};
+
+#define DESC_CNT 7
+
 extern struct pool kernel_pool, user_pool;
 
 void mem_init(void);
+
+void block_desc_init(struct mem_block_desc* desc_array);
 
 uint32_t* pte_ptr(void* vaddr);
 uint32_t* pde_ptr(void* vaddr);
