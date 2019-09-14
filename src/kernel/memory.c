@@ -16,6 +16,7 @@
 #define PDE_IDX(addr) ((addr & 0xffc00000) >> 22)  // 得到页目录项的index
 #define PTE_IDX(addr) ((addr & 0x003ff000) >> 12)  // 得到页表项的index
 
+// 内存仓库
 struct arena
 {
     struct mem_block_desc* desc;

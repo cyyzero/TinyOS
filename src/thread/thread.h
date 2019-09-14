@@ -64,22 +64,22 @@ struct thread_stack
 // PCB，进程或者线程的控制块
 struct task_struct
 {
-    uint32_t* self_kstack;                   // 内核线程自己的内核栈
+    uint32_t* self_kstack;                         // 内核线程自己的内核栈
     pid_t pid;
     enum task_status status;
     char name[16];
 
     uint8_t priority;
-    uint8_t ticks;                           // 每次在处理器上执行的时间滴答数
-    uint32_t elapsed_ticks;                  // 此任务自上cpu运行后至今占用了多少cpu滴答数
+    uint8_t ticks;                                 // 每次在处理器上执行的时间滴答数
+    uint32_t elapsed_ticks;                        // 此任务自上cpu运行后至今占用了多少cpu滴答数
 
-    struct list_elem general_tag;            // 用于表示线程在一般的队列中的节点
-    struct list_elem all_list_tag;           // 用于表示线程队列thread_all_list中的节点
+    struct list_elem general_tag;                  // 用于表示线程在一般的队列中的节点
+    struct list_elem all_list_tag;                 // 用于表示线程队列thread_all_list中的节点
 
-    uint32_t* pgdir;                         // 进程自己页表的虚拟地址
-    struct virtual_addr userprog_vaddr;      // 用户进程的虚拟地址
-    struct mem_block_desc u_block_desc[DESC_CNT];
-    uint32_t stack_magic;                    // 栈的边界标记，用于检测栈的溢出
+    uint32_t* pgdir;                               // 进程自己页表的虚拟地址
+    struct virtual_addr userprog_vaddr;            // 用户进程的虚拟地址
+    struct mem_block_desc u_block_desc[DESC_CNT];  // 用户进程内存块描述符
+    uint32_t stack_magic;                          // 栈的边界标记，用于检测栈的溢出
 };
 
 extern struct list thread_ready_list;               // 就绪队列
