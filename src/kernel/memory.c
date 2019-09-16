@@ -294,6 +294,7 @@ put_char('\n');
     put_str("   mem_pool_init done\n");
 }
 
+// 返回arena中第idx个内存块的地址
 static struct mem_block* arena2block(struct arena* a, uint32_t idx)
 {
     return (struct mem_block*)((uint32_t)a + sizeof(struct arena) + idx * a->desc->block_size);
